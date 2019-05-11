@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="d3540e5a-73ac-471c-9a6d-d6d869552a50" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/../AcutalMiner_Web3/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../AcutalMiner_Web3/Web3.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CarryTheBricks/CarryCoins.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CarryTheBricks/Coins.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CarryTheBricks/Compared.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CarryTheBricks/ETH.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CarryTheBricks/Kline.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CarryTheBricks/exchange.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CarryTheBricks/gridTrading.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CarryTheBricks/newGridTrading.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CarryTheBricks/test_Temp.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CarryTheBricks/tradeByExchange.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Trading/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Trading/backTest.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Trading/demo.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Trading/historicalData.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Trading/historicalFR.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Trading/main.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Trading/randomPrice.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Trading/tmp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../.gitattributes" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../.gitignore" beforeDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FUSProjectUsageTrigger">
+    <session id="450795419">
+      <usages-collector id="statistics.lifecycle.project">
+        <counts>
+          <entry key="project.open.time.0" value="1" />
+          <entry key="project.opened" value="1" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.open">
+        <counts>
+          <entry key="py" value="1" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.open">
+        <counts>
+          <entry key="Python" value="1" />
+        </counts>
+      </usages-collector>
+    </session>
+  </component>
+  <component name="FileEditorManager">
+    <leaf>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/main.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="833">
+              <caret line="93" column="18" selection-start-line="93" selection-start-column="18" selection-end-line="93" selection-end-column="18" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/main.py" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="-15" />
+    <option name="y" value="28" />
+    <option name="width" value="1932" />
+    <option name="height" value="1045" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane" />
+      <pane id="Scope" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="d3540e5a-73ac-471c-9a6d-d6d869552a50" name="Default Changelist" comment="" />
+      <created>1557536387012</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1557536387012</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="true" />
+    <layout>
+      <window_info id="Favorites" side_tool="true" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24973656" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info anchor="bottom" id="Version Control" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Python Console" />
+      <window_info anchor="bottom" id="Terminal" />
+      <window_info anchor="bottom" id="Event Log" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+    </layout>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="833">
+          <caret line="93" column="18" selection-start-line="93" selection-start-column="18" selection-end-line="93" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>
