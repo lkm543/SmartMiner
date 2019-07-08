@@ -1,94 +1,181 @@
 import wx
-
-class HelloFrame(wx.Frame):
+import json
+import os
+import subprocess
+import signal
+import sys
+import datetime
+#https://www.itread01.com/p/527729.html
+#r = os.popen("echo abc")
+#print(r.read())
+class SmartMiner(wx.Frame):
     """
     A Frame that says Hello World
     """
 
     def __init__(self, *args, **kw):
         # ensure the parent's __init__ is called
-        super(HelloFrame, self).__init__(*args, **kw)
+        super(SmartMiner, self).__init__(*args, **kw)
+        self.readDefaultParameter()
+        self.version = "v1.0"
+        self.versionClaymore = "v14.0"
+        self.running = False
+        self.helpAuthor = True
+        self.PID = 0
 
         # create a panel in the frame
         pnl = wx.Panel(self)
 
-        # and put some text with a larger bold font on it
-        st = wx.StaticText(pnl, label="Hello World!", pos=(25,25))
-        font = st.GetFont()
-        font.PointSize += 10
+        #bat txt
+        self.cmdTxt = wx.StaticText(pnl, label="請輸入參數(按下Start後自動儲存)", pos=(10,10))
+        self.command = wx.TextCtrl(pnl, id = -1,value=self.config['command'], pos=(10, 30),size=(600, 25))
+        self.command.label = "command"
+        font = self.cmdTxt.GetFont()
+        font.PointSize += 2
+        self.cmdTxt.SetFont(font)
+
+        #pool pool
+        self.poolTxt = wx.StaticText(pnl, label="礦池地址", pos=(10,80))
+        self.pool = wx.TextCtrl(pnl, id = -1,value=self.config['pool'], pos=(80, 75),size=(310, 25))
+        self.pool.label = "pool"
+        font = self.poolTxt.GetFont()
+        font.PointSize += 2
+        self.poolTxt.SetFont(font)
+
+        #pool wallet
+        self.walletTxt = wx.StaticText(pnl, label="錢包地址", pos=(10,120))
+        self.wallet = wx.TextCtrl(pnl, id = -1,value=self.config['ewal'] , pos=(80, 115),size=(310, 25))
+        self.wallet.label = "wallet"
+        font = self.walletTxt.GetFont()
+        font.PointSize += 2
+        self.walletTxt.SetFont(font)
+
+        #pool eworker
+        self.workerTxt = wx.StaticText(pnl, label="礦工名稱", pos=(10,160))
+        self.worker = wx.TextCtrl(pnl, id = -1,value=self.config['eworker'], pos=(80, 155),size=(310, 25))
+        self.worker.label = "worker"
+        font = self.workerTxt.GetFont()
+        font.PointSize += 2
+        self.workerTxt.SetFont(font)
+
+        #pool email
+        self.emailTxt = wx.StaticText(pnl, label="Email", pos=(10,200))
+        self.email = wx.TextCtrl(pnl, id = -1,value=self.config['email'], pos=(80, 195),size=(310, 25))
+        self.email.label = "email"
+        font = self.emailTxt.GetFont()
+        font.PointSize += 2
+        self.emailTxt.SetFont(font)
+
+        #Time
+        self.versionTxt = wx.StaticText(pnl, label=str(datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')), pos=(400,72))
+        font = self.versionTxt.GetFont()
+        font.PointSize += 5
+        self.versionTxt.SetFont(font)
+
+        #tune tyoe
+        self.timer1 = wx.RadioButton(pnl, label='契約用時間', pos=(400, 105))
+        self.timer2 = wx.RadioButton(pnl, label='住商簡易型時間', pos=(400, 130))
+
+        self.timer1.Bind(wx.EVT_RADIOBUTTON, self.onChecked)
+        self.timer2.Bind(wx.EVT_RADIOBUTTON, self.onChecked)
+
+        #help author checkBox
+        self.helpAuthorCheckBox = wx.CheckBox(pnl, -1, "也幫作者挖10分鐘(感恩)", pos=[400,150] ,size = [300,30])
+        self.helpAuthorCheckBox.Bind(wx.EVT_CHECKBOX, self.onCheckedHelpAuthor)
+
+        #Start
+        self.start = wx.Button(pnl, -1, "Start",pos=[520,185],size=(80, 40))
+        font = self.start.GetFont()
+        font.PointSize += 5
+        self.start.SetFont(font)
+        self.start.Bind(wx.EVT_BUTTON, self.startClicked)
+
+        #Status
+        self.st = wx.StaticText(pnl, label="暫停", pos=(400,185))
+        font = self.st.GetFont()
+        font.PointSize += 15
         font = font.Bold()
-        st.SetFont(font)
+        self.st.SetFont(font)
 
-        # create a menu bar
-        self.makeMenuBar()
+        #version
+        self.versionTxt = wx.StaticText(pnl, label="時間礦工"+self.version+" (Claymore "+self.versionClaymore+")", pos=(10,230))
+        font = self.versionTxt.GetFont()
+        font.PointSize += 5
+        self.versionTxt.SetFont(font)
 
+        self.Bind(wx.EVT_TEXT,self.OnTyped)
         # and a status bar
         self.CreateStatusBar()
-        self.SetStatusText("Welcome to wxPython!")
+        self.SetStatusText("Bug回報或其他合作:lkm543@gmail.com")
 
+    def writeModifiedParameter(self):
+        with open('config.txt', 'w') as file:
+            file.write(json.dumps(self.config))
 
-    def makeMenuBar(self):
-        """
-        A menu bar is composed of menus, which are composed of menu items.
-        This method builds a set of menus and binds handlers to be called
-        when the menu item is selected.
-        """
+    def readDefaultParameter(self):
+        with open('config.txt') as f:
+            self.config = json.load(f)
 
-        # Make a file menu with Hello and Exit items
-        fileMenu = wx.Menu()
-        # The "\t..." syntax defines an accelerator key that also triggers
-        # the same event
-        helloItem = fileMenu.Append(-1, "&Hello...\tCtrl-H",
-                "Help string shown in status bar for this menu item")
-        fileMenu.AppendSeparator()
-        # When using a stock ID we don't need to specify the menu item's
-        # label
-        exitItem = fileMenu.Append(wx.ID_EXIT)
+    def OnTyped(self,e):
+        label = e.GetEventObject().label
+        txt = e.GetString()
+        if label == 'command':
+            self.config['command'] = txt
+        elif label == 'pool':
+            self.config['pool'] = txt
+        elif label == 'worker':
+            self.config['eworker'] = txt
+        elif label == 'email':
+            self.config['email'] = txt
+        elif label == 'wallet':
+            self.config['ewal'] = txt
+        print(self.config)
 
-        # Now a help menu for the about item
-        helpMenu = wx.Menu()
-        aboutItem = helpMenu.Append(wx.ID_ABOUT)
+    def onChecked(self, e):
+        cb = e.GetEventObject()
+        print (cb.GetLabel(), ' is clicked', cb.GetValue())
 
-        # Make the menu bar and add the two menus to it. The '&' defines
-        # that the next letter is the "mnemonic" for the menu item. On the
-        # platforms that support it those letters are underlined and can be
-        # triggered from the keyboard.
-        menuBar = wx.MenuBar()
-        menuBar.Append(fileMenu, "&File")
-        menuBar.Append(helpMenu, "&Help")
+    def newVersion(self):
+        return True
 
-        # Give the menu bar to the frame
-        self.SetMenuBar(menuBar)
-
-        # Finally, associate a handler function with the EVT_MENU event for
-        # each of the menu items. That means that when that menu item is
-        # activated then the associated handler function will be called.
-        self.Bind(wx.EVT_MENU, self.OnHello, helloItem)
-        self.Bind(wx.EVT_MENU, self.OnExit,  exitItem)
-        self.Bind(wx.EVT_MENU, self.OnAbout, aboutItem)
-
-
-    def OnExit(self, event):
+    def startClicked(self, event):
         """Close the frame, terminating the application."""
-        self.Close(True)
-
-
-    def OnHello(self, event):
-        """Say hello to the user."""
-        wx.MessageBox("Hello again from wxPython")
-
-
-    def OnAbout(self, event):
-        """Display an About Dialog"""
-        wx.MessageBox("This is a wxPython Hello World sample",
-                      "About Hello World 2",
-                      wx.OK|wx.ICON_INFORMATION)
-
-
+        self.writeModifiedParameter()
+        self.running = not self.running
+        if self.running:
+            self.command.Disable()
+            self.pool.Disable()
+            self.worker.Disable()
+            self.wallet.Disable()
+            self.email.Disable()
+            self.st.SetLabel("運行中")
+            self.start.SetLabel("Stop")
+            #subprocess.call("./Claymore/EthDcrMiner64.exe -epool eu1.ethermine.org:4444 -ewal 0xD69af2A796A737A103F12d2f0BCC563a13900E6F -epsw x")
+            #with open('Claymore\start.bat', 'w') as file:
+            #    file.writerow("Claymore/EthDcrMiner64.exe -epool "+self.config['pool']+" -ewal 0xD69af2A796A737A103F12d2f0BCC563a13900E6F -epsw x")
+            commandLine = str("Claymore\start.bat")
+            p = subprocess.Popen(commandLine, shell=False)
+            self.PID = p.pid
+        else:
+            self.command.Enable()
+            self.pool.Enable()
+            self.worker.Enable()
+            self.wallet.Enable()
+            self.email.Enable()
+            self.st.SetLabel("暫停")
+            self.start.SetLabel("Start")
+            os.kill(self.PID, signal.CTRL_C_EVENT)
+        #self.status.SetLabel(self.state)
+        #print("H")
+        #self.Close(True)
+    def onCheckedHelpAuthor(self, e):
+        self.helpAuthor = not self.helpAuthor
+        print("helpAuthor:",self.helpAuthor)
 if __name__ == '__main__':
-    # When this module is run (not imported) then create the app, the
-    # frame, show it, and start the event loop.
+
     app = wx.App()
-    frm = HelloFrame(None, title='Hello World 2')
+    frm = SmartMiner(None, title='時間挖礦v1.0')
+    frm.SetMaxSize(wx.Size(640,400))
+    frm.SetMinSize(wx.Size(640,400))
     frm.Show()
     app.MainLoop()
