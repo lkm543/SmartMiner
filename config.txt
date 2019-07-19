@@ -1,0 +1,1 @@
+{"command": "test command", "pool": "eth.gpumine.org:3333", "ewal": "0x7E757b1625e0e5F54e2a8ea92828e7b971e23414", "eworker": "SmartMiner", "email": "lkm543@gmail.com"}
