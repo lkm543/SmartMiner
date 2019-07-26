@@ -1,9 +1,11 @@
-import wx
+import datetime
 import json
 import os
-import subprocess
 import signal
-import datetime
+import subprocess
+
+import wx
+
 # https://www.itread01.com/p/527729.html
 # r = os.popen("echo abc")
 # print(r.read())
@@ -108,20 +110,6 @@ class SmartMiner(wx. Frame):
         self.CreateStatusBar()
         self.SetStatusText("Bug回報或合作:lkm543@gmail.com")
 
-        # Scrolling Box
-
-        vbox = wx.BoxSizer(wx.VERTICAL)
-
-        desc = wx.StaticText(self, -1, "xxx")
-
-        desc.SetForegroundColour("Blue")
-        vbox.Add(desc, 0, wx.ALIGN_LEFT | wx.ALL, 5)
-        vbox.Add(wx.StaticLine(self, -1, size=(1024, -1)), 0, wx.ALL, 5)
-        vbox.Add((20, 20))
-
-        self.SetSizer(vbox)
-        self.SetupScrolling()
-
     def writeModifiedParameter(self):
         with open('config.txt', 'w') as file:
             file.write(json.dumps(self.config))
@@ -155,11 +143,15 @@ class SmartMiner(wx. Frame):
     def startClicked(self, event):
         self.writeModifiedParameter()
         if not self.running:
-            commandLine = "./start.bat"
+            commandLine = "start.bat"
             print(commandLine)
             #, cwd="/Claymore/"
             try:
-                self.p = subprocess.Popen(commandLine, cwd="Claymore/", stdout=subprocess.PIPE)
+                cwd = os.path.dirname(os.path.realpath(__file__)) + "\\Claymore\\"
+                self.p = subprocess.Popen(commandLine,
+                                          cwd=cwd,
+                                          stdout=subprocess.PIPE,
+                                          shell=True)
                 self.PID = self.p.pid
                 if self.p is not None:
                     self.running = not self.running
@@ -173,15 +165,18 @@ class SmartMiner(wx. Frame):
             except Exception as e:
                 print(e)
         else:
-            self.command.Enable()
-            self.pool.Enable()
-            self.worker.Enable()
-            self.wallet.Enable()
-            self.email.Enable()
-            self.st.SetLabel("暫停")
-            self.start.SetLabel("Start")
-            os.kill(self.PID, signal.CTRL_C_EVENT)
-            self.running = not self.running
+            self.stopMiner()
+
+    def stopMiner(self):
+        self.command.Enable()
+        self.pool.Enable()
+        self.worker.Enable()
+        self.wallet.Enable()
+        self.email.Enable()
+        self.st.SetLabel("暫停")
+        self.start.SetLabel("Start")
+        os.kill(self.PID, signal.CTRL_C_EVENT)
+        self.running = not self.running
 
     def onCheckedHelpAuthor(self, e):
         self.helpAuthor = not self.helpAuthor
@@ -195,14 +190,22 @@ class SmartMiner(wx. Frame):
         font.PointSize += 5
         self.versionTxt.SetFont(font)
 
-        # Read output of terminal
-        if self.running:
-            try:
-                pass
-                print(self.p.stdout)
-            except Exception as e:
-                print(e)
-                pass
+        # Check if the miner is alive or not
+        if self.p is not None and self.running:
+            poll = self.p.poll()
+            if poll is not None:
+                # p.subprocess is NOT alive
+                self.stopMiner()
+                print('Miner stops......')
+            # Read output of terminal
+            else:
+                try:
+                    lines = self.p.stdout.readlines()
+                    for line in lines:
+                        print(line.decode('utf-8','ignore'))
+                except Exception as e:
+                    print(e)
+                    pass
 
 
 if __name__ == '__main__':
