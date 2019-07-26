@@ -6,11 +6,8 @@ import subprocess
 
 import wx
 
-# https://www.itread01.com/p/527729.html
-# r = os.popen("echo abc")
-# print(r.read())
 
-
+# TODO: Check time type
 class SmartMiner(wx. Frame):
 
     def __init__(self, *args, **kw):
@@ -43,7 +40,7 @@ class SmartMiner(wx. Frame):
         # pool
         self.poolTxt = wx.StaticText(self.pnl,
                                      label="礦池地址",
-                                     pos=(10,80))
+                                     pos=(10, 80))
         self.pool = wx.TextCtrl(self.pnl,
                                 id=-1,
                                 value=self.config['pool'],
@@ -87,7 +84,7 @@ class SmartMiner(wx. Frame):
                                       label="Email",
                                       pos=(10, 200))
         self.email = wx.TextCtrl(self.pnl,
-                                 id = -1,
+                                 id=-1,
                                  value=self.config['email'],
                                  pos=(80, 195),
                                  size=(310, 25))
@@ -99,17 +96,17 @@ class SmartMiner(wx. Frame):
         # Scrolling status text
         self.minerStatus = wx.TextCtrl(self.pnl,
                                        value='等待開始中\n',
-                                       style=wx.TE_MULTILINE|wx.TE_READONLY,
+                                       style=wx.TE_MULTILINE | wx.TE_READONLY,
                                        pos=(10, 270),
                                        size=(600, 260))
-        self.minerStatus.SetBackgroundColour((0,0,0))
-        self.minerStatus.SetForegroundColour((200,200,200))
+        self.minerStatus.SetBackgroundColour((0, 0, 0))
+        self.minerStatus.SetForegroundColour((200, 200, 200))
 
         # Timer
         time = str(datetime.datetime.now().strftime('%Y/%m/%d\n\n%H:%M:%S'))
         self.timeTxt = wx.StaticText(self.pnl, label=time, pos=(400, 72))
         font = self.timeTxt.GetFont()
-        font.PointSize += 6
+        font.PointSize += 5
         self.timeTxt.SetFont(font)
 
         # Time
@@ -140,14 +137,18 @@ class SmartMiner(wx. Frame):
         self.helpAuthorCheckBox.SetValue(True)
 
         # Start
-        self.start = wx.Button(self.pnl, -1, "Start",pos=[520,185],size=(80, 40))
+        self.start = wx.Button(self.pnl,
+                               -1,
+                               "Start",
+                               pos=[520, 185],
+                               size=(80, 40))
         font = self.start.GetFont()
         font.PointSize += 5
         self.start.SetFont(font)
         self.start.Bind(wx.EVT_BUTTON, self.startClicked)
 
         # Status
-        self.st = wx.StaticText(self.pnl, label="暫停", pos=(400,185))
+        self.st = wx.StaticText(self.pnl, label="暫停", pos=(400, 185))
         font = self.st.GetFont()
         font.PointSize += 15
         font = font.Bold()
@@ -157,12 +158,12 @@ class SmartMiner(wx. Frame):
         versionTxt = f"時間礦工{self.version} (Claymore{self.versionClaymore})"
         self.versionTxt = wx.StaticText(self.pnl,
                                         label=versionTxt,
-                                        pos=(10,230))
+                                        pos=(10, 230))
         font = self.versionTxt.GetFont()
         font.PointSize += 5
         self.versionTxt.SetFont(font)
 
-        self.Bind(wx.EVT_TEXT,self.OnTyped)
+        self.Bind(wx.EVT_TEXT, self.OnTyped)
         #  and a status bar
         self.CreateStatusBar()
         self.SetStatusText("Bug回報或合作:lkm543@gmail.com")
@@ -193,18 +194,20 @@ class SmartMiner(wx. Frame):
 
     def onChecked(self, e):
         cb = e.GetEventObject()
-        print (cb.GetLabel(), 'is clicked', cb.GetValue())
+        print(cb.GetLabel(), 'is clicked', cb.GetValue())
 
     def newVersion(self):
         return True
 
     def startClicked(self, event):
+        # TODO: Check 離峰與否
         self.writeModifiedParameter()
         if not self.running:
             commandLine = "start.bat"
-            try:                
+            try:
                 self.minerStatus.AppendText('開始運行Claymore.....(請稍待5秒)\n')
-                cwd = os.path.dirname(os.path.realpath(__file__)) + "\\Claymore\\"
+                cwd = os.path.dirname(os.path.realpath(__file__))
+                cwd += "\\Claymore\\"
                 self.p = subprocess.Popen(commandLine,
                                           cwd=cwd,
                                           stdout=subprocess.PIPE,
@@ -260,13 +263,14 @@ class SmartMiner(wx. Frame):
             # Read output of terminal
             else:
                 try:
+                    # Check the time
+                    weekday = datetime.datetime.today().weekday() + 1
+                    # print(f'Weekday:{weekday}')
                     lines = self.p.stdout.readlines()
                     for line in lines:
                         miner_status = line.decode('utf-8', 'ignore')
                         print(miner_status)
                         self.minerStatus.AppendText(miner_status)
-                        end = self.minerStatus.GetLastPosition()
-                        pos = self.minerStatus.GetInsertionPoint()
                 except Exception as e:
                     self.minerStatus.AppendText(f'{e}\n')
 
