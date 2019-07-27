@@ -4,7 +4,9 @@ import os
 import signal
 import subprocess
 
+import requests
 import wx
+
 # pyinstaller -F -w .\main.py
 # pyinstaller -F .\main.py --noconsole
 
@@ -15,12 +17,41 @@ class SmartMiner(wx. Frame):
         #  ensure the parent's __init__ is called
         super(SmartMiner, self).__init__(*args, **kw)
         self.readDefaultParameter()
-        self.version = "v1.0"
-        self.versionClaymore = "v14.0"
+        self.version, self.versionClaymore = self.getVersion()
         self.running = False
         self.helpAuthor = True
         self.p = None
         self.PID = None
+        self.stop_period = {
+            1: {
+                'start': 27000,
+                'finish': 81000
+            },
+            2: {
+                'start': 27000,
+                'finish': 81000
+            },
+            3: {
+                'start': 27000,
+                'finish': 81000
+            },
+            4: {
+                'start': 27000,
+                'finish': 81000
+            },
+            5: {
+                'start': 27000,
+                'finish': 81000
+            },
+            6: {
+                'start': 0,
+                'finish': 0
+            },
+            7: {
+                'start': 0,
+                'finish': 0
+            },
+        }
 
         #  create a panel in the frame
         self.pnl = wx.Panel(self)
@@ -95,8 +126,12 @@ class SmartMiner(wx. Frame):
         self.emailTxt.SetFont(font)
 
         # Scrolling status text
+        if self.checkPeak():
+            miner_state = '------等待開始中(尖峰)------\n'
+        else:
+            miner_state = '------等待開始中(離峰)------\n'
         self.minerStatus = wx.TextCtrl(self.pnl,
-                                       value='------等待開始中------\n',
+                                       value=miner_state,
                                        style=wx.TE_MULTILINE | wx.TE_READONLY,
                                        pos=(10, 270),
                                        size=(1240, 500))
@@ -120,6 +155,7 @@ class SmartMiner(wx. Frame):
         self.Bind(wx.EVT_TIMER, self.onTimer)
 
         # tune tyoe
+        '''
         self.timer1 = wx.RadioButton(self.pnl,
                                      label='契約用時間',
                                      pos=(400, 105),
@@ -130,6 +166,7 @@ class SmartMiner(wx. Frame):
 
         self.timer1.Bind(wx.EVT_RADIOBUTTON, self.onChecked)
         self.timer2.Bind(wx.EVT_RADIOBUTTON, self.onChecked)
+        '''
 
         # help author checkBox
         self.helpAuthorCheckBox = wx.CheckBox(self.pnl,
@@ -196,6 +233,18 @@ class SmartMiner(wx. Frame):
                 self.config['ewal'] = txt
             print(self.config)
 
+    def checkPeak(self):
+        weekday = datetime.datetime.today().weekday() + 1
+        now = datetime.datetime.now()
+        midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        seconds = (now - midnight).seconds
+        start = self.stop_period[weekday]['start']
+        finish = self.stop_period[weekday]['finish']
+        if start < seconds < finish:
+            return True
+        else:
+            return False
+
     def onChecked(self, e):
         cb = e.GetEventObject()
         print(cb.GetLabel(), 'is clicked', cb.GetValue())
@@ -209,25 +258,36 @@ class SmartMiner(wx. Frame):
         if not self.running:
             commandLine = "start.bat"
             try:
-                self.minerStatus.AppendText('------開始運行Claymore.....(請稍待5秒)------\n')
-                cwd = os.path.dirname(os.path.realpath(__file__))
-                cwd += "\\Claymore\\"
-                self.p = subprocess.Popen(commandLine,
-                                          cwd=cwd,
-                                          stdout=subprocess.PIPE,
-                                          stderr=subprocess.PIPE,
-                                          stdin=subprocess.PIPE,
-                                          shell=True,
-                                          bufsize=-1)
-                self.PID = self.p.pid
-                if self.p is not None:
+                peak = self.checkPeak()
+                if not peak:
+                    self.minerStatus.AppendText('------開始運行Claymore(請稍待5秒)------\n')
+                    cwd = os.path.dirname(os.path.realpath(__file__))
+                    cwd += "\\Claymore\\"
+                    self.p = subprocess.Popen(commandLine,
+                                            cwd=cwd,
+                                            stdout=subprocess.PIPE,
+                                            stderr=subprocess.PIPE,
+                                            stdin=subprocess.PIPE,
+                                            shell=True,
+                                            bufsize=-1)
+                    self.PID = self.p.pid
+                    if self.p is not None:
+                        self.running = not self.running
+                        self.command.Disable()
+                        self.pool.Disable()
+                        self.worker.Disable()
+                        self.wallet.Disable()
+                        self.email.Disable()
+                        self.st.SetLabel("運行中")
+                        self.start.SetLabel("Stop")
+                else:
                     self.running = not self.running
                     self.command.Disable()
                     self.pool.Disable()
                     self.worker.Disable()
                     self.wallet.Disable()
                     self.email.Disable()
-                    self.st.SetLabel("運行中")
+                    self.st.SetLabel("運行中\n(尖峰等待中)")
                     self.start.SetLabel("Stop")
             except Exception as e:
                 print(e)
@@ -242,12 +302,24 @@ class SmartMiner(wx. Frame):
         self.email.Enable()
         self.st.SetLabel("暫停")
         self.start.SetLabel("Start")
-        os.kill(self.PID, signal.CTRL_C_EVENT)
+        try:
+            os.kill(self.PID, signal.CTRL_C_EVENT)
+        except Exception:
+            pass
         self.running = not self.running
 
     def onCheckedHelpAuthor(self, e):
         self.helpAuthor = not self.helpAuthor
         print("helpAuthor:", self.helpAuthor)
+
+    def getVersion(self):
+        url = ''
+        try:
+            version = requests.get(url).json
+            return version['SmartMiner'], version['Claymore']
+        except Exception:
+            return "Unknown", "Unknown" 
+        # return "v1.0", "v14.7"
 
     def onTimer(self, event):
         # Timer
@@ -269,14 +341,14 @@ class SmartMiner(wx. Frame):
             # Read output of terminal
             else:
                 try:
-                    # Check the time
-                    weekday = datetime.datetime.today().weekday() + 1
-                    # print(f'Weekday:{weekday}')
                     lines = self.p.stdout.readlines()
                     for line in lines:
                         miner_status = line.decode('utf-8', 'ignore')
                         print(miner_status)
                         self.minerStatus.AppendText(miner_status)
+                    # Check the time
+                    if self.checkPeak:
+                        self.stopMiner
                 except Exception as e:
                     self.minerStatus.AppendText(f'{e}\n')
 
