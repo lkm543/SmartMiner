@@ -7,17 +7,21 @@ import subprocess
 import requests
 import wx
 
-# pyinstaller -F -w .\main.py
-# pyinstaller -F .\main.py --noconsole
 
-# TODO: Check time type
+# pyinstaller -F -w .\main.py
 class SmartMiner(wx. Frame):
 
     def __init__(self, *args, **kw):
         #  ensure the parent's __init__ is called
         super(SmartMiner, self).__init__(*args, **kw)
+        # Version of this release
+        self.version = "1.0"
+        self.Claymore = "14.7"
+        # Latest release
+        self.releaseNote = self.getVersion()
+        self.latestVersion = self.releaseNote[0]['version']
+        self.latestClaymore = self.releaseNote[0]['claymore']
         self.readDefaultParameter()
-        self.version, self.versionClaymore = self.getVersion()
         self.running = False
         self.helpAuthor = True
         self.p = None
@@ -58,11 +62,11 @@ class SmartMiner(wx. Frame):
 
         # bat txt
         cmdLabel = "請輸入參數(按下Start後自動儲存)"
-        self.cmdTxt = wx.StaticText(self.pnl, label=cmdLabel, pos=(10, 10))
+        self.cmdTxt = wx.StaticText(self.pnl, label=cmdLabel, pos=(40, 80))
         self.command = wx.TextCtrl(self.pnl,
                                    id=-1,
                                    value=self.config['command'],
-                                   pos=(10, 30),
+                                   pos=(40, 110),
                                    size=(600, 25))
         self.command.label = "command"
         font = self.cmdTxt.GetFont()
@@ -72,11 +76,11 @@ class SmartMiner(wx. Frame):
         # pool
         self.poolTxt = wx.StaticText(self.pnl,
                                      label="礦池地址",
-                                     pos=(10, 80))
+                                     pos=(40, 165))
         self.pool = wx.TextCtrl(self.pnl,
                                 id=-1,
                                 value=self.config['pool'],
-                                pos=(80, 75),
+                                pos=(110, 160),
                                 size=(310, 25))
         self.pool.label = "pool"
         font = self.poolTxt.GetFont()
@@ -86,11 +90,11 @@ class SmartMiner(wx. Frame):
         # pool wallet
         self.walletTxt = wx.StaticText(self.pnl,
                                        label="錢包地址",
-                                       pos=(10, 120))
+                                       pos=(40, 205))
         self.wallet = wx.TextCtrl(self.pnl,
                                   id=-1,
                                   value=self.config['ewal'],
-                                  pos=(80, 115),
+                                  pos=(110, 200),
                                   size=(310, 25))
         self.wallet.label = "wallet"
         font = self.walletTxt.GetFont()
@@ -100,11 +104,11 @@ class SmartMiner(wx. Frame):
         # pool eworker
         self.workerTxt = wx.StaticText(self.pnl,
                                        label="礦工名稱",
-                                       pos=(10, 160))
+                                       pos=(40, 245))
         self.worker = wx.TextCtrl(self.pnl,
                                   id=-1,
                                   value=self.config['eworker'],
-                                  pos=(80, 155),
+                                  pos=(110, 240),
                                   size=(310, 25))
         self.worker.label = "worker"
         font = self.workerTxt.GetFont()
@@ -114,11 +118,11 @@ class SmartMiner(wx. Frame):
         # pool email
         self.emailTxt = wx.StaticText(self.pnl,
                                       label="Email",
-                                      pos=(10, 200))
+                                      pos=(40, 285))
         self.email = wx.TextCtrl(self.pnl,
                                  id=-1,
                                  value=self.config['email'],
-                                 pos=(80, 195),
+                                 pos=(110, 280),
                                  size=(310, 25))
         self.email.label = "email"
         font = self.emailTxt.GetFont()
@@ -133,8 +137,8 @@ class SmartMiner(wx. Frame):
         self.minerStatus = wx.TextCtrl(self.pnl,
                                        value=miner_state,
                                        style=wx.TE_MULTILINE | wx.TE_READONLY,
-                                       pos=(10, 270),
-                                       size=(1240, 500))
+                                       pos=(10, 320),
+                                       size=(1240, 450))
         self.minerStatus.SetBackgroundColour((0, 0, 0))
         self.minerStatus.SetForegroundColour((200, 200, 200))
         font = self.minerStatus.GetFont()
@@ -143,7 +147,7 @@ class SmartMiner(wx. Frame):
 
         # Timer
         time = str(datetime.datetime.now().strftime('%Y/%m/%d\n\n%H:%M:%S'))
-        self.timeTxt = wx.StaticText(self.pnl, label=time, pos=(400, 72))
+        self.timeTxt = wx.StaticText(self.pnl, label=time, pos=(430, 142))
         font = self.timeTxt.GetFont()
         font.PointSize += 5
         self.timeTxt.SetFont(font)
@@ -172,7 +176,7 @@ class SmartMiner(wx. Frame):
         self.helpAuthorCheckBox = wx.CheckBox(self.pnl,
                                               id=-1,
                                               label="也幫作者挖10分鐘(感恩)",
-                                              pos=[400, 150],
+                                              pos=[430, 180],
                                               size=[300, 30])
         self.helpAuthorCheckBox.Bind(wx.EVT_CHECKBOX, self.onCheckedHelpAuthor)
         self.helpAuthorCheckBox.SetValue(True)
@@ -181,25 +185,25 @@ class SmartMiner(wx. Frame):
         self.start = wx.Button(self.pnl,
                                -1,
                                "Start",
-                               pos=[520, 185],
-                               size=(80, 40))
+                               pos=[430, 270],
+                               size=(200, 40))
         font = self.start.GetFont()
         font.PointSize += 5
         self.start.SetFont(font)
         self.start.Bind(wx.EVT_BUTTON, self.startClicked)
 
         # Status
-        self.st = wx.StaticText(self.pnl, label="暫停", pos=(400, 185))
+        self.st = wx.StaticText(self.pnl, label="暫停", pos=(430, 180))
         font = self.st.GetFont()
         font.PointSize += 15
         font = font.Bold()
         self.st.SetFont(font)
 
         # version
-        versionTxt = f"時間礦工{self.version} (Claymore{self.versionClaymore})"
+        versionTxt = f"時間礦工{self.latestVersion} (Claymore{self.latestClaymore})"
         self.versionTxt = wx.StaticText(self.pnl,
                                         label=versionTxt,
-                                        pos=(10, 230))
+                                        pos=(10, 10))
         font = self.versionTxt.GetFont()
         font.PointSize += 5
         self.versionTxt.SetFont(font)
@@ -253,24 +257,25 @@ class SmartMiner(wx. Frame):
         return True
 
     def startClicked(self, event):
-        # TODO: Check 離峰與否
         self.writeModifiedParameter()
         if not self.running:
             commandLine = "start.bat"
             try:
                 peak = self.checkPeak()
+                # 離峰
                 if not peak:
                     self.minerStatus.AppendText('------開始運行Claymore(請稍待5秒)------\n')
                     cwd = os.path.dirname(os.path.realpath(__file__))
                     cwd += "\\Claymore\\"
                     self.p = subprocess.Popen(commandLine,
-                                            cwd=cwd,
-                                            stdout=subprocess.PIPE,
-                                            stderr=subprocess.PIPE,
-                                            stdin=subprocess.PIPE,
-                                            shell=True,
-                                            bufsize=-1)
+                                              cwd=cwd,
+                                              stdout=subprocess.PIPE,
+                                              stderr=subprocess.PIPE,
+                                              stdin=subprocess.PIPE,
+                                              shell=True,
+                                              bufsize=-1)
                     self.PID = self.p.pid
+                    # 如果開啟PID成功
                     if self.p is not None:
                         self.running = not self.running
                         self.command.Disable()
@@ -278,8 +283,9 @@ class SmartMiner(wx. Frame):
                         self.worker.Disable()
                         self.wallet.Disable()
                         self.email.Disable()
-                        self.st.SetLabel("運行中")
+                        self.st.SetLabel("運行中(離峰)")
                         self.start.SetLabel("Stop")
+                # 尖峰
                 else:
                     self.running = not self.running
                     self.command.Disable()
@@ -292,6 +298,7 @@ class SmartMiner(wx. Frame):
             except Exception as e:
                 print(e)
         else:
+            # 運行中，終止程序
             self.stopMiner()
 
     def stopMiner(self):
@@ -313,13 +320,24 @@ class SmartMiner(wx. Frame):
         print("helpAuthor:", self.helpAuthor)
 
     def getVersion(self):
-        url = ''
+        url = 'https://www.lkm543.site/smartMiner.json'
         try:
-            version = requests.get(url).json
-            return version['SmartMiner'], version['Claymore']
+            data = requests.get(url).json()
+            print(f"Author : {data['author']}")
+            print(f"Contact: {data['contact']}")
+            print(f"Website: {data['website']}")
+            releaseNote = data['versionNote']
+            return releaseNote
         except Exception:
-            return "Unknown", "Unknown" 
-        # return "v1.0", "v14.7"
+            data = [
+                {
+                    "version": "?",
+                    "claymore": "?",
+                    "url": "http://www.lkm543.site/smartMiner.rar",
+                    "upload_note": "抓取失敗"
+                }
+            ]
+            return data
 
     def onTimer(self, event):
         # Timer
