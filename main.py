@@ -5,7 +5,8 @@ import signal
 import subprocess
 
 import wx
-
+# pyinstaller -F -w .\main.py
+# pyinstaller -F .\main.py --noconsole
 
 # TODO: Check time type
 class SmartMiner(wx. Frame):
@@ -90,17 +91,20 @@ class SmartMiner(wx. Frame):
                                  size=(310, 25))
         self.email.label = "email"
         font = self.emailTxt.GetFont()
-        font.PointSize += 2
+        font.PointSize += 1
         self.emailTxt.SetFont(font)
 
         # Scrolling status text
         self.minerStatus = wx.TextCtrl(self.pnl,
-                                       value='等待開始中\n',
+                                       value='------等待開始中------\n',
                                        style=wx.TE_MULTILINE | wx.TE_READONLY,
                                        pos=(10, 270),
-                                       size=(600, 260))
+                                       size=(1240, 500))
         self.minerStatus.SetBackgroundColour((0, 0, 0))
         self.minerStatus.SetForegroundColour((200, 200, 200))
+        font = self.minerStatus.GetFont()
+        font.PointSize += 2
+        self.minerStatus.SetFont(font)
 
         # Timer
         time = str(datetime.datetime.now().strftime('%Y/%m/%d\n\n%H:%M:%S'))
@@ -205,12 +209,14 @@ class SmartMiner(wx. Frame):
         if not self.running:
             commandLine = "start.bat"
             try:
-                self.minerStatus.AppendText('開始運行Claymore.....(請稍待5秒)\n')
+                self.minerStatus.AppendText('------開始運行Claymore.....(請稍待5秒)------\n')
                 cwd = os.path.dirname(os.path.realpath(__file__))
                 cwd += "\\Claymore\\"
                 self.p = subprocess.Popen(commandLine,
                                           cwd=cwd,
                                           stdout=subprocess.PIPE,
+                                          stderr=subprocess.PIPE,
+                                          stdin=subprocess.PIPE,
                                           shell=True,
                                           bufsize=-1)
                 self.PID = self.p.pid
@@ -258,7 +264,7 @@ class SmartMiner(wx. Frame):
                     print(miner_status)
                     self.minerStatus.AppendText(miner_status)
                 self.stopMiner()
-                self.minerStatus.AppendText('Claymore已終止\n')
+                self.minerStatus.AppendText('------Claymore已終止------\n')
                 print('Miner stops......')
             # Read output of terminal
             else:
@@ -279,7 +285,7 @@ if __name__ == '__main__':
 
     app = wx.App()
     frm = SmartMiner(None, title='時間挖礦v1.0')
-    frm.SetMaxSize(wx.Size(640, 600))
-    frm.SetMinSize(wx.Size(640, 600))
+    frm.SetMaxSize(wx.Size(1280, 840))
+    frm.SetMinSize(wx.Size(1280, 840))
     frm.Show()
     app.MainLoop()
