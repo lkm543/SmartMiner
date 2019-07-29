@@ -9,6 +9,7 @@ import wx
 
 
 # pyinstaller -F -w .\main.py
+# TODO: 假日
 class SmartMiner(wx. Frame):
 
     def __init__(self, *args, **kw):
@@ -23,7 +24,7 @@ class SmartMiner(wx. Frame):
         self.latestClaymore = self.releaseNote[0]['claymore']
         self.readDefaultParameter()
         self.running = False
-        self.helpAuthor = True
+        self.helpAuthor = False
         self.p = None
         self.PID = None
         self.stop_period = {
@@ -61,17 +62,17 @@ class SmartMiner(wx. Frame):
         self.pnl = wx.Panel(self)
 
         # bat txt
-        cmdLabel = "請輸入參數(按下Start後自動儲存)"
-        self.cmdTxt = wx.StaticText(self.pnl, label=cmdLabel, pos=(40, 80))
+        # cmdLabel = "請輸入參數(按下Start後自動儲存)"
+        # self.cmdTxt = wx.StaticText(self.pnl, label=cmdLabel, pos=(40, 80))
         self.command = wx.TextCtrl(self.pnl,
                                    id=-1,
                                    value=self.config['command'],
-                                   pos=(40, 110),
+                                   pos=(40, 100),
                                    size=(600, 25))
         self.command.label = "command"
-        font = self.cmdTxt.GetFont()
-        font.PointSize += 2
-        self.cmdTxt.SetFont(font)
+        # font = self.cmdTxt.GetFont()
+        # font.PointSize += 2
+        # self.cmdTxt.SetFont(font)
 
         # pool
         self.poolTxt = wx.StaticText(self.pnl,
@@ -146,10 +147,10 @@ class SmartMiner(wx. Frame):
         self.minerStatus.SetFont(font)
 
         # Timer
-        time = str(datetime.datetime.now().strftime('%Y/%m/%d\n\n%H:%M:%S'))
-        self.timeTxt = wx.StaticText(self.pnl, label=time, pos=(430, 142))
+        time = str(datetime.datetime.now().strftime('%Y/%m/%d\n%H:%M:%S'))
+        self.timeTxt = wx.StaticText(self.pnl, label=time, pos=(500, 10))
         font = self.timeTxt.GetFont()
-        font.PointSize += 5
+        font.PointSize += 10
         self.timeTxt.SetFont(font)
 
         # Time
@@ -159,27 +160,35 @@ class SmartMiner(wx. Frame):
         self.Bind(wx.EVT_TIMER, self.onTimer)
 
         # tune tyoe
-        '''
-        self.timer1 = wx.RadioButton(self.pnl,
-                                     label='契約用時間',
-                                     pos=(400, 105),
-                                     style=wx.RB_GROUP)
-        self.timer2 = wx.RadioButton(self.pnl,
-                                     label='住商簡易型時間',
-                                     pos=(400, 130))
-
-        self.timer1.Bind(wx.EVT_RADIOBUTTON, self.onChecked)
-        self.timer2.Bind(wx.EVT_RADIOBUTTON, self.onChecked)
-        '''
+        self.mineMode1 = wx.RadioButton(self.pnl,
+                                        label='使用自己的start.bat挖(放入Claymore資料夾下)',
+                                        pos=(10, 50))
+        self.mineMode2 = wx.RadioButton(self.pnl,
+                                        label='輸入命令列挖(按下Start後自動儲存)',
+                                        pos=(10, 80))
+        self.mineMode3 = wx.RadioButton(self.pnl,
+                                        label='輸入參數(按下Start後自動儲存)',
+                                        pos=(10, 140))
+        font = self.mineMode1.GetFont()
+        font.PointSize += 2
+        self.mineMode1.SetFont(font)
+        font = self.mineMode2.GetFont()
+        font.PointSize += 2
+        self.mineMode2.SetFont(font)
+        font = self.mineMode3.GetFont()
+        font.PointSize += 2
+        self.mineMode3.SetFont(font)
+        self.mineMode1.Bind(wx.EVT_RADIOBUTTON, self.onChecked)
+        self.mineMode2.Bind(wx.EVT_RADIOBUTTON, self.onChecked)
+        self.mineMode3.Bind(wx.EVT_RADIOBUTTON, self.onChecked)
 
         # help author checkBox
         self.helpAuthorCheckBox = wx.CheckBox(self.pnl,
                                               id=-1,
                                               label="也幫作者挖10分鐘(感恩)",
-                                              pos=[430, 180],
+                                              pos=[430, 240],
                                               size=[300, 30])
         self.helpAuthorCheckBox.Bind(wx.EVT_CHECKBOX, self.onCheckedHelpAuthor)
-        self.helpAuthorCheckBox.SetValue(True)
 
         # Start
         self.start = wx.Button(self.pnl,
@@ -193,9 +202,13 @@ class SmartMiner(wx. Frame):
         self.start.Bind(wx.EVT_BUTTON, self.startClicked)
 
         # Status
-        self.st = wx.StaticText(self.pnl, label="暫停", pos=(430, 180))
+        if self.checkPeak():
+            system_state = '暫停\n(尖峰)'
+        else:
+            system_state = '暫停\n(離峰)\n'
+        self.st = wx.StaticText(self.pnl, label=system_state, pos=(430, 150))
         font = self.st.GetFont()
-        font.PointSize += 15
+        font.PointSize += 18
         font = font.Bold()
         self.st.SetFont(font)
 
@@ -283,7 +296,7 @@ class SmartMiner(wx. Frame):
                         self.worker.Disable()
                         self.wallet.Disable()
                         self.email.Disable()
-                        self.st.SetLabel("運行中(離峰)")
+                        self.st.SetLabel("運行中\n(離峰)")
                         self.start.SetLabel("Stop")
                 # 尖峰
                 else:
@@ -341,7 +354,7 @@ class SmartMiner(wx. Frame):
 
     def onTimer(self, event):
         # Timer
-        time = str(datetime.datetime.now().strftime('%Y/%m/%d  %H:%M:%S'))
+        time = str(datetime.datetime.now().strftime('%Y/%m/%d\n%H:%M:%S'))
         self.timeTxt.SetLabel(time)
         # Check if the miner is alive or not
         if self.p is not None and self.running:
