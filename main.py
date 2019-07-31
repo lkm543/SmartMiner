@@ -10,7 +10,7 @@ import wx
 
 
 # pyinstaller -F -w .\main.py
-# TODO: 假日
+# TODO:載入雲端config
 class SmartMiner(wx.Frame):
     def __init__(self, *args, **kw):
         #  ensure the parent's __init__ is called
@@ -21,10 +21,10 @@ class SmartMiner(wx.Frame):
         # Latest release
         self.releaseNote, self.nationalHoliday = self.getVersion()
         print(self.releaseNote)
-        self.latestVersion = self.releaseNote[0]['version']
-        self.latestClaymore = self.releaseNote[0]['claymore']
-        self.latestVersionURL = self.releaseNote[0]['smartminer_url']
-        self.latestClaymoreURL = self.releaseNote[0]['claymore_url']
+        self.latestVersion = self.releaseNote['version']
+        self.latestClaymore = self.releaseNote['claymore']
+        self.latestVersionURL = self.releaseNote['smartminer_url']
+        self.latestClaymoreURL = self.releaseNote['claymore_url']
         self.readDefaultParameter()
         self.running = False
         self.helpAuthor = False
@@ -234,9 +234,9 @@ class SmartMiner(wx.Frame):
         self.SetStatusText("Bug回報或合作:lkm543@gmail.com")
 
         # New version recommendation
-        if float(self.version) < float(self.latestVersion) or True:
+        if float(self.version) < float(self.latestVersion):
             self.onNewVersion()
-        elif float(self.Claymore) < float(self.latestClaymore):
+        elif float(self.Claymore) < float(self.latestClaymore) or True:
             self.onNewClaymoreVersion()
 
     def onNewClaymoreVersion(self):
@@ -286,7 +286,6 @@ class SmartMiner(wx.Frame):
         start = self.stop_period[weekday]['start']
         finish = self.stop_period[weekday]['finish']
         for nH in self.nationalHoliday:
-            print(now_timestamp, nH)
             if nH['start'] < now_timestamp < nH['finish']:
                 return False
         if start < seconds < finish:
@@ -375,17 +374,25 @@ class SmartMiner(wx.Frame):
             print(f"Website: {data['website']}")
             releaseNote = data['versionNote']
             nationalHoliday = data['nationalHoliday']
-            return releaseNote, nationalHoliday
+            if 'version' not in releaseNote[0].keys():
+                releaseNote[0]['version'] = 0.0
+            if 'claymore' not in releaseNote[0].keys():
+                releaseNote[0]['claymore'] = 0.0
+            if 'smartminer_url' not in releaseNote[0].keys():
+                releaseNote[0]['smartminer_url'] = "https://www.lkm543.site/smartMiner.rar"
+            if 'claymore_url' not in releaseNote[0].keys():
+                releaseNote[0]['claymore_url'] = "https://www.lkm543.site/Claymore.rar"
+            if 'upload_note' not in releaseNote[0].keys():
+                releaseNote[0]['upload_note'] = "抓取失敗"
+            return releaseNote[0], nationalHoliday
         except Exception:
-            data = [
-                {
-                    "version": "0.0",
-                    "claymore": "0.0",
-                    "smartminer_url": "https://www.lkm543.site/smartMiner.rar",
-                    "claymore_url": "https://www.lkm543.site/Claymore.rar",
-                    "upload_note": "抓取失敗"
-                }
-            ]
+            data = {
+                "version": "0.0",
+                "claymore": "0.0",
+                "smartminer_url": "https://www.lkm543.site/smartMiner.rar",
+                "claymore_url": "https://www.lkm543.site/Claymore.rar",
+                "upload_note": "抓取失敗"
+            }
             nationalHoliday = [
                 {
                     "start": 0,
