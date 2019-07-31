@@ -20,7 +20,6 @@ class SmartMiner(wx.Frame):
         self.Claymore = "14.7"
         # Latest release
         self.releaseNote, self.nationalHoliday = self.getVersion()
-        print(self.releaseNote)
         self.latestVersion = self.releaseNote['version']
         self.latestClaymore = self.releaseNote['claymore']
         self.latestVersionURL = self.releaseNote['smartminer_url']
@@ -67,13 +66,11 @@ class SmartMiner(wx.Frame):
         # bat txt
         # cmdLabel = "請輸入參數(按下Start後自動儲存)"
         # self.cmdTxt = wx.StaticText(self.pnl, label=cmdLabel, pos=(40, 80))
-        self.command = wx.TextCtrl(
-            self.pnl,
-            id=-1,
-            value=self.config['command'],
-            pos=(40, 100),
-            size=(600, 25)
-        )
+        self.command = wx.TextCtrl(self.pnl,
+                                   id=-1,
+                                   value=self.config['command'],
+                                   pos=(40, 100),
+                                   size=(600, 25))
         self.command.label = "command"
         # font = self.cmdTxt.GetFont()
         # font.PointSize += 2
@@ -81,13 +78,11 @@ class SmartMiner(wx.Frame):
 
         # pool
         self.poolTxt = wx.StaticText(self.pnl, label="礦池地址", pos=(40, 165))
-        self.pool = wx.TextCtrl(
-            self.pnl,
-            id=-1,
-            value=self.config['pool'],
-            pos=(110, 160),
-            size=(310, 25)
-        )
+        self.pool = wx.TextCtrl(self.pnl,
+                                id=-1,
+                                value=self.config['pool'],
+                                pos=(110, 160),
+                                size=(310, 25))
         self.pool.label = "pool"
         font = self.poolTxt.GetFont()
         font.PointSize += 2
@@ -95,13 +90,11 @@ class SmartMiner(wx.Frame):
 
         # pool wallet
         self.walletTxt = wx.StaticText(self.pnl, label="錢包地址", pos=(40, 205))
-        self.wallet = wx.TextCtrl(
-            self.pnl,
-            id=-1,
-            value=self.config['ewal'],
-            pos=(110, 200),
-            size=(310, 25)
-        )
+        self.wallet = wx.TextCtrl(self.pnl,
+                                  id=-1,
+                                  value=self.config['ewal'],
+                                  pos=(110, 200),
+                                  size=(310, 25))
         self.wallet.label = "wallet"
         font = self.walletTxt.GetFont()
         font.PointSize += 2
@@ -109,13 +102,11 @@ class SmartMiner(wx.Frame):
 
         # pool eworker
         self.workerTxt = wx.StaticText(self.pnl, label="礦工名稱", pos=(40, 245))
-        self.worker = wx.TextCtrl(
-            self.pnl,
-            id=-1,
-            value=self.config['eworker'],
-            pos=(110, 240),
-            size=(310, 25)
-        )
+        self.worker = wx.TextCtrl(self.pnl,
+                                  id=-1,
+                                  value=self.config['eworker'],
+                                  pos=(110, 240),
+                                  size=(310, 25))
         self.worker.label = "worker"
         font = self.workerTxt.GetFont()
         font.PointSize += 2
@@ -123,13 +114,11 @@ class SmartMiner(wx.Frame):
 
         # pool email
         self.emailTxt = wx.StaticText(self.pnl, label="Email", pos=(40, 285))
-        self.email = wx.TextCtrl(
-            self.pnl,
-            id=-1,
-            value=self.config['email'],
-            pos=(110, 280),
-            size=(310, 25)
-        )
+        self.email = wx.TextCtrl(self.pnl,
+                                 id=-1,
+                                 value=self.config['email'],
+                                 pos=(110, 280),
+                                 size=(310, 25))
         self.email.label = "email"
         font = self.emailTxt.GetFont()
         font.PointSize += 1
@@ -140,13 +129,11 @@ class SmartMiner(wx.Frame):
             miner_state = '------等待開始中(尖峰)------\n'
         else:
             miner_state = '------等待開始中(離峰)------\n'
-        self.minerStatus = wx.TextCtrl(
-            self.pnl,
-            value=miner_state,
-            style=wx.TE_MULTILINE | wx.TE_READONLY,
-            pos=(10, 320),
-            size=(1240, 450)
-        )
+        self.minerStatus = wx.TextCtrl(self.pnl,
+                                       value=miner_state,
+                                       style=wx.TE_MULTILINE | wx.TE_READONLY,
+                                       pos=(10, 320),
+                                       size=(1240, 450))
         self.minerStatus.SetBackgroundColour((0, 0, 0))
         self.minerStatus.SetForegroundColour((200, 200, 200))
         font = self.minerStatus.GetFont()
@@ -168,14 +155,13 @@ class SmartMiner(wx.Frame):
 
         # tune tyoe
         self.mineMode1 = wx.RadioButton(
-            self.pnl, label='使用自己的start.bat挖(放入Claymore資料夾下)', pos=(10, 50)
-        )
-        self.mineMode2 = wx.RadioButton(
-            self.pnl, label='輸入命令列挖(按下Start後自動儲存)', pos=(10, 80)
-        )
-        self.mineMode3 = wx.RadioButton(
-            self.pnl, label='輸入參數(按下Start後自動儲存)', pos=(10, 140)
-        )
+            self.pnl, label='使用自己的start.bat挖(放入Claymore資料夾下)', pos=(10, 50))
+        self.mineMode2 = wx.RadioButton(self.pnl,
+                                        label='輸入命令列挖(按下Start後自動儲存)',
+                                        pos=(10, 80))
+        self.mineMode3 = wx.RadioButton(self.pnl,
+                                        label='輸入參數(按下Start後自動儲存)',
+                                        pos=(10, 140))
         font = self.mineMode1.GetFont()
         font.PointSize += 2
         self.mineMode1.SetFont(font)
@@ -190,19 +176,19 @@ class SmartMiner(wx.Frame):
         self.mineMode3.Bind(wx.EVT_RADIOBUTTON, self.onChecked)
 
         # help author checkBox
-        self.helpAuthorCheckBox = wx.CheckBox(
-            self.pnl,
-            id=-1,
-            label="也幫作者挖10分鐘(感恩)",
-            pos=[430, 240],
-            size=[300, 30]
-        )
+        self.helpAuthorCheckBox = wx.CheckBox(self.pnl,
+                                              id=-1,
+                                              label="也幫作者挖10分鐘(感恩)",
+                                              pos=[430, 240],
+                                              size=[300, 30])
         self.helpAuthorCheckBox.Bind(wx.EVT_CHECKBOX, self.onCheckedHelpAuthor)
 
         # Start
-        self.start = wx.Button(
-            self.pnl, -1, "Start", pos=[430, 270], size=(200, 40)
-        )
+        self.start = wx.Button(self.pnl,
+                               -1,
+                               "Start",
+                               pos=[430, 270],
+                               size=(200, 40))
         font = self.start.GetFont()
         font.PointSize += 5
         self.start.SetFont(font)
@@ -221,9 +207,9 @@ class SmartMiner(wx.Frame):
 
         # version
         versionTxt = f"時間礦工{self.version} (Claymore{self.Claymore})"
-        self.versionTxt = wx.StaticText(
-            self.pnl, label=versionTxt, pos=(10, 10)
-        )
+        self.versionTxt = wx.StaticText(self.pnl,
+                                        label=versionTxt,
+                                        pos=(10, 10))
         font = self.versionTxt.GetFont()
         font.PointSize += 5
         self.versionTxt.SetFont(font)
@@ -240,14 +226,16 @@ class SmartMiner(wx.Frame):
             self.onNewClaymoreVersion()
 
     def onNewClaymoreVersion(self):
-        dlg = wx.MessageDialog(None, u"新的Claymore釋出了，是否要下載?", u"有新的版本喔", wx.YES_NO | wx.ICON_QUESTION)
+        dlg = wx.MessageDialog(None, "新的Claymore釋出了，是否要下載?", "有新的版本喔",
+                               wx.YES_NO | wx.ICON_QUESTION)
         if dlg.ShowModal() == wx.ID_YES:
             webbrowser.open(self.latestClaymoreURL, new=0, autoraise=True)
             dlg.Destroy()
             self.Close(True)
 
     def onNewVersion(self):
-        dlg = wx.MessageDialog(None, u"新的版本釋出了，是否要下載?", u"有新的版本喔", wx.YES_NO | wx.ICON_QUESTION)
+        dlg = wx.MessageDialog(None, "新的版本釋出了，是否要下載?", "有新的版本喔",
+                               wx.YES_NO | wx.ICON_QUESTION)
         if dlg.ShowModal() == wx.ID_YES:
             webbrowser.open(self.latestVersionURL, new=0, autoraise=True)
             dlg.Destroy()
@@ -306,19 +294,16 @@ class SmartMiner(wx.Frame):
                 # 離峰
                 if not peak:
                     self.minerStatus.AppendText(
-                        '------開始運行Claymore(請稍待5秒)------\n'
-                    )
+                        '------開始運行Claymore(請稍待5秒)------\n')
                     cwd = os.path.dirname(os.path.realpath(__file__))
                     cwd += "\\Claymore\\"
-                    self.p = subprocess.Popen(
-                        commandLine,
-                        cwd=cwd,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        stdin=subprocess.PIPE,
-                        shell=True,
-                        bufsize=-1
-                    )
+                    self.p = subprocess.Popen(commandLine,
+                                              cwd=cwd,
+                                              stdout=subprocess.PIPE,
+                                              stderr=subprocess.PIPE,
+                                              stdin=subprocess.PIPE,
+                                              shell=True,
+                                              bufsize=-1)
                     self.PID = self.p.pid
                     # 如果開啟PID成功
                     if self.p is not None:
@@ -379,9 +364,11 @@ class SmartMiner(wx.Frame):
             if 'claymore' not in releaseNote[0].keys():
                 releaseNote[0]['claymore'] = 0.0
             if 'smartminer_url' not in releaseNote[0].keys():
-                releaseNote[0]['smartminer_url'] = "https://www.lkm543.site/smartMiner.rar"
+                releaseNote[0]['smartminer_url'] = \
+                    "https://www.lkm543.site/smartMiner.rar"
             if 'claymore_url' not in releaseNote[0].keys():
-                releaseNote[0]['claymore_url'] = "https://www.lkm543.site/Claymore.rar"
+                releaseNote[0]['claymore_url'] = \
+                    "https://www.lkm543.site/Claymore.rar"
             if 'upload_note' not in releaseNote[0].keys():
                 releaseNote[0]['upload_note'] = "抓取失敗"
             return releaseNote[0], nationalHoliday
@@ -393,12 +380,7 @@ class SmartMiner(wx.Frame):
                 "claymore_url": "https://www.lkm543.site/Claymore.rar",
                 "upload_note": "抓取失敗"
             }
-            nationalHoliday = [
-                {
-                    "start": 0,
-                    "finish": 0
-                }
-            ]
+            nationalHoliday = [{"start": 0, "finish": 0}]
             return data, nationalHoliday
 
     def onTimer(self, event):
