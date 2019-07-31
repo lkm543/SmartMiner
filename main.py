@@ -3,6 +3,7 @@ import json
 import os
 import signal
 import subprocess
+import webbrowser
 
 import requests
 import wx
@@ -18,9 +19,12 @@ class SmartMiner(wx.Frame):
         self.version = "1.0"
         self.Claymore = "14.7"
         # Latest release
-        self.releaseNote = self.getVersion()
+        self.releaseNote, self.nationalHoliday = self.getVersion()
+        print(self.releaseNote)
         self.latestVersion = self.releaseNote[0]['version']
         self.latestClaymore = self.releaseNote[0]['claymore']
+        self.latestVersionURL = self.releaseNote[0]['smartminer_url']
+        self.latestClaymoreURL = self.releaseNote[0]['claymore_url']
         self.readDefaultParameter()
         self.running = False
         self.helpAuthor = False
@@ -216,7 +220,7 @@ class SmartMiner(wx.Frame):
         self.st.SetFont(font)
 
         # version
-        versionTxt = f"時間礦工{self.latestVersion} (Claymore{self.latestClaymore})"
+        versionTxt = f"時間礦工{self.version} (Claymore{self.Claymore})"
         self.versionTxt = wx.StaticText(
             self.pnl, label=versionTxt, pos=(10, 10)
         )
@@ -225,9 +229,29 @@ class SmartMiner(wx.Frame):
         self.versionTxt.SetFont(font)
 
         self.Bind(wx.EVT_TEXT, self.OnTyped)
-        #  and a status bar
+        # and a status bar
         self.CreateStatusBar()
         self.SetStatusText("Bug回報或合作:lkm543@gmail.com")
+
+        # New version recommendation
+        if float(self.version) < float(self.latestVersion) or True:
+            self.onNewVersion()
+        elif float(self.Claymore) < float(self.latestClaymore):
+            self.onNewClaymoreVersion()
+
+    def onNewClaymoreVersion(self):
+        dlg = wx.MessageDialog(None, u"新的Claymore釋出了，是否要下載?", u"有新的版本喔", wx.YES_NO | wx.ICON_QUESTION)
+        if dlg.ShowModal() == wx.ID_YES:
+            webbrowser.open(self.latestClaymoreURL, new=0, autoraise=True)
+            dlg.Destroy()
+            self.Close(True)
+
+    def onNewVersion(self):
+        dlg = wx.MessageDialog(None, u"新的版本釋出了，是否要下載?", u"有新的版本喔", wx.YES_NO | wx.ICON_QUESTION)
+        if dlg.ShowModal() == wx.ID_YES:
+            webbrowser.open(self.latestVersionURL, new=0, autoraise=True)
+            dlg.Destroy()
+            self.Close(True)
 
     def writeModifiedParameter(self):
         with open('config.txt', 'w') as file:
@@ -254,12 +278,17 @@ class SmartMiner(wx.Frame):
             print(self.config)
 
     def checkPeak(self):
+        now_timestamp = datetime.datetime.now().timestamp()
         weekday = datetime.datetime.today().weekday() + 1
         now = datetime.datetime.now()
         midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
         seconds = (now - midnight).seconds
         start = self.stop_period[weekday]['start']
         finish = self.stop_period[weekday]['finish']
+        for nH in self.nationalHoliday:
+            print(now_timestamp, nH)
+            if nH['start'] < now_timestamp < nH['finish']:
+                return False
         if start < seconds < finish:
             return True
         else:
@@ -268,9 +297,6 @@ class SmartMiner(wx.Frame):
     def onChecked(self, e):
         cb = e.GetEventObject()
         print(cb.GetLabel(), 'is clicked', cb.GetValue())
-
-    def newVersion(self):
-        return True
 
     def startClicked(self, event):
         self.writeModifiedParameter()
@@ -342,22 +368,31 @@ class SmartMiner(wx.Frame):
     def getVersion(self):
         url = 'https://www.lkm543.site/smartMiner.json'
         try:
+            # TODO: Key not exist check
             data = requests.get(url).json()
             print(f"Author : {data['author']}")
             print(f"Contact: {data['contact']}")
             print(f"Website: {data['website']}")
             releaseNote = data['versionNote']
-            return releaseNote
+            nationalHoliday = data['nationalHoliday']
+            return releaseNote, nationalHoliday
         except Exception:
             data = [
                 {
-                    "version": "?",
-                    "claymore": "?",
-                    "url": "http://www.lkm543.site/smartMiner.rar",
+                    "version": "0.0",
+                    "claymore": "0.0",
+                    "smartminer_url": "https://www.lkm543.site/smartMiner.rar",
+                    "claymore_url": "https://www.lkm543.site/Claymore.rar",
                     "upload_note": "抓取失敗"
                 }
             ]
-            return data
+            nationalHoliday = [
+                {
+                    "start": 0,
+                    "finish": 0
+                }
+            ]
+            return data, nationalHoliday
 
     def onTimer(self, event):
         # Timer

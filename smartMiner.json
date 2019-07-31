@@ -1,0 +1,20 @@
+{
+    "versionNote": [
+        {
+            "version" : "1.0",
+            "claymore" : "14.7",
+            "smartminer_url" : "https://www.lkm543.site/smartMiner.rar",
+            "claymore_url" : "https://www.lkm543.site/Claymore.rar",
+            "upload_note" : "初始測試版-Beta"
+        }
+    ],
+    "nationalHoliday": [
+        {
+            "start": 1564582478,
+            "finish": 1564584478
+        }
+    ],
+    "author": "Lee, Keng-Ming",
+    "contact": "lkm543@gmail.com",
+    "website": "https://www.lkm543.site/"
+}
