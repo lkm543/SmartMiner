@@ -1,3 +1,5 @@
 Claymore/*
 .idea/*
 .vscode/*
+build/*
+dist/*
