@@ -26,6 +26,7 @@ class SmartMiner(wx.Frame):
         self.latestClaymoreURL = self.releaseNote['claymore_url']
         self.readDefaultParameter()
         self.running = False
+        self.miner_mode = 0
         self.p = None
         self.PID = None
         self.stop_period = {
@@ -106,18 +107,6 @@ class SmartMiner(wx.Frame):
         font.PointSize += 2
         self.workerTxt.SetFont(font)
 
-        # pool email
-        self.emailTxt = wx.StaticText(self.pnl, label="Email", pos=(40, 285))
-        self.email = wx.TextCtrl(self.pnl,
-                                 id=-1,
-                                 value=self.config['email'],
-                                 pos=(110, 280),
-                                 size=(310, 25))
-        self.email.label = "email"
-        font = self.emailTxt.GetFont()
-        font.PointSize += 1
-        self.emailTxt.SetFont(font)
-
         # Scrolling status text
         if self.checkPeak():
             miner_state = '------等待開始中(尖峰)------\n'
@@ -126,7 +115,7 @@ class SmartMiner(wx.Frame):
         self.minerStatus = wx.TextCtrl(self.pnl,
                                        value=miner_state,
                                        style=wx.TE_MULTILINE | wx.TE_READONLY,
-                                       pos=(10, 320),
+                                       pos=(10, 280),
                                        size=(630, 440))
         self.minerStatus.SetBackgroundColour((0, 0, 0))
         self.minerStatus.SetForegroundColour((200, 200, 200))
@@ -157,7 +146,6 @@ class SmartMiner(wx.Frame):
         self.pool.Disable()
         self.worker.Disable()
         self.wallet.Disable()
-        self.email.Disable()
         self.mineMode2 = wx.RadioButton(self.pnl,
                                         label='輸入命令列挖',
                                         name='miner_command',
@@ -183,7 +171,7 @@ class SmartMiner(wx.Frame):
         self.start = wx.Button(self.pnl,
                                -1,
                                "Start",
-                               pos=[430, 270],
+                               pos=[430, 225],
                                size=(200, 40))
         font = self.start.GetFont()
         font.PointSize += 5
@@ -195,9 +183,9 @@ class SmartMiner(wx.Frame):
             system_state = '暫停\n(尖峰)'
         else:
             system_state = '暫停\n(離峰)\n'
-        self.st = wx.StaticText(self.pnl, label=system_state, pos=(430, 150))
+        self.st = wx.StaticText(self.pnl, label=system_state, pos=(430, 140))
         font = self.st.GetFont()
-        font.PointSize += 18
+        font.PointSize += 12
         font = font.Bold()
         self.st.SetFont(font)
 
@@ -255,8 +243,6 @@ class SmartMiner(wx.Frame):
                 self.config['pool'] = txt
             elif label == 'worker':
                 self.config['eworker'] = txt
-            elif label == 'email':
-                self.config['email'] = txt
             elif label == 'wallet':
                 self.config['ewal'] = txt
             print(self.config)
@@ -281,28 +267,51 @@ class SmartMiner(wx.Frame):
         cb = e.GetEventObject()
         checked_label = cb.GetName()
         if checked_label == 'miner_bat':
+            self.miner_mode = 0
             self.command.Disable()
             self.pool.Disable()
             self.worker.Disable()
             self.wallet.Disable()
-            self.email.Disable()
-        elif checked_label == 'miner_parm':
-            self.pool.Enable()
-            self.worker.Enable()
-            self.wallet.Enable()
-            self.email.Enable()
-            self.command.Disable()
         elif checked_label == 'miner_command':
+            self.miner_mode = 1
             self.command.Enable()
             self.pool.Disable()
             self.worker.Disable()
             self.wallet.Disable()
-            self.email.Disable()
+        elif checked_label == 'miner_parm':
+            self.miner_mode = 2
+            self.pool.Enable()
+            self.worker.Enable()
+            self.wallet.Enable()
+            self.command.Disable()
         print(cb.GetName(), 'is clicked', cb.GetValue())
 
     def startClicked(self, event):
         self.writeModifiedParameter()
         if not self.running:
+            if self.miner_mode == 1:
+                string = "setx GPU_FORCE_64BIT_PTR 0\n"
+                string += "setx GPU_MAX_HEAP_SIZE 100\n"
+                string += "setx GPU_USE_SYNC_OBJECTS 1\n"
+                string += "setx GPU_MAX_ALLOC_PERCENT 100\n"
+                string += "setx GPU_SINGLE_ALLOC_PERCENT 100\n"
+                string += self.config['command']
+                with open('Claymore/start.bat', 'w') as file:
+                    print("Write command to start.bat")
+                    file.write(string)
+            elif self.miner_mode == 2:
+                string = "setx GPU_FORCE_64BIT_PTR 0\n"
+                string += "setx GPU_MAX_HEAP_SIZE 100\n"
+                string += "setx GPU_USE_SYNC_OBJECTS 1\n"
+                string += "setx GPU_MAX_ALLOC_PERCENT 100\n"
+                string += "setx GPU_SINGLE_ALLOC_PERCENT 100\n"
+                string += f"EthDcrMiner64.exe -epool {self.config['pool']} " \
+                          f"-ewal {self.config['ewal']} " \
+                          f"-eworker {self.config['eworker']} "
+                with open('Claymore/start.bat', 'w') as file:
+                    print("Write parms to start.bat")
+                    file.write(string)
+
             commandLine = "start.bat"
             try:
                 peak = self.checkPeak()
@@ -327,7 +336,6 @@ class SmartMiner(wx.Frame):
                         self.pool.Disable()
                         self.worker.Disable()
                         self.wallet.Disable()
-                        self.email.Disable()
                         self.st.SetLabel("運行中\n(離峰)")
                         self.start.SetLabel("Stop")
                 # 尖峰
@@ -337,7 +345,6 @@ class SmartMiner(wx.Frame):
                     self.pool.Disable()
                     self.worker.Disable()
                     self.wallet.Disable()
-                    self.email.Disable()
                     self.st.SetLabel("運行中\n(尖峰等待中)")
                     self.start.SetLabel("Stop")
             except Exception as e:
@@ -351,7 +358,6 @@ class SmartMiner(wx.Frame):
         self.pool.Enable()
         self.worker.Enable()
         self.wallet.Enable()
-        self.email.Enable()
         self.st.SetLabel("暫停")
         self.start.SetLabel("Start")
         try:
@@ -420,8 +426,8 @@ class SmartMiner(wx.Frame):
                         print(miner_status)
                         self.minerStatus.AppendText(miner_status)
                     # Check the time
-                    if self.checkPeak:
-                        self.stopMiner
+                    if self.checkPeak():
+                        self.stopMiner()
                 except Exception as e:
                     self.minerStatus.AppendText(f'{e}\n')
 
