@@ -26,7 +26,6 @@ class SmartMiner(wx.Frame):
         self.latestClaymoreURL = self.releaseNote['claymore_url']
         self.readDefaultParameter()
         self.running = False
-        self.helpAuthor = False
         self.p = None
         self.PID = None
         self.stop_period = {
@@ -63,18 +62,13 @@ class SmartMiner(wx.Frame):
         #  create a panel in the frame
         self.pnl = wx.Panel(self)
 
-        # bat txt
-        # cmdLabel = "請輸入參數(按下Start後自動儲存)"
-        # self.cmdTxt = wx.StaticText(self.pnl, label=cmdLabel, pos=(40, 80))
+        # command
         self.command = wx.TextCtrl(self.pnl,
                                    id=-1,
                                    value=self.config['command'],
                                    pos=(40, 100),
                                    size=(600, 25))
         self.command.label = "command"
-        # font = self.cmdTxt.GetFont()
-        # font.PointSize += 2
-        # self.cmdTxt.SetFont(font)
 
         # pool
         self.poolTxt = wx.StaticText(self.pnl, label="礦池地址", pos=(40, 165))
@@ -133,34 +127,44 @@ class SmartMiner(wx.Frame):
                                        value=miner_state,
                                        style=wx.TE_MULTILINE | wx.TE_READONLY,
                                        pos=(10, 320),
-                                       size=(1240, 450))
+                                       size=(630, 440))
         self.minerStatus.SetBackgroundColour((0, 0, 0))
         self.minerStatus.SetForegroundColour((200, 200, 200))
         font = self.minerStatus.GetFont()
         font.PointSize += 2
         self.minerStatus.SetFont(font)
 
-        # Timer
+        # Time
         time = str(datetime.datetime.now().strftime('%Y/%m/%d\n%H:%M:%S'))
         self.timeTxt = wx.StaticText(self.pnl, label=time, pos=(500, 10))
         font = self.timeTxt.GetFont()
         font.PointSize += 10
         self.timeTxt.SetFont(font)
 
-        # Time
+        # Timer
         self.onTimer(None)
         self.timer = wx.Timer(self, -1)
         self.timer.Start(1000)
         self.Bind(wx.EVT_TIMER, self.onTimer)
 
         # tune tyoe
-        self.mineMode1 = wx.RadioButton(
-            self.pnl, label='使用自己的start.bat挖(放入Claymore資料夾下)', pos=(10, 50))
+        self.mineMode1 = wx.RadioButton(self.pnl,
+                                        label='使用自己的start.bat挖',
+                                        name='miner_bat',
+                                        pos=(10, 50))
+        self.mineMode1.SetValue(True)
+        self.command.Disable()
+        self.pool.Disable()
+        self.worker.Disable()
+        self.wallet.Disable()
+        self.email.Disable()
         self.mineMode2 = wx.RadioButton(self.pnl,
-                                        label='輸入命令列挖(按下Start後自動儲存)',
+                                        label='輸入命令列挖',
+                                        name='miner_command',
                                         pos=(10, 80))
         self.mineMode3 = wx.RadioButton(self.pnl,
-                                        label='輸入參數(按下Start後自動儲存)',
+                                        label='輸入參數',
+                                        name='miner_parm',
                                         pos=(10, 140))
         font = self.mineMode1.GetFont()
         font.PointSize += 2
@@ -174,14 +178,6 @@ class SmartMiner(wx.Frame):
         self.mineMode1.Bind(wx.EVT_RADIOBUTTON, self.onChecked)
         self.mineMode2.Bind(wx.EVT_RADIOBUTTON, self.onChecked)
         self.mineMode3.Bind(wx.EVT_RADIOBUTTON, self.onChecked)
-
-        # help author checkBox
-        self.helpAuthorCheckBox = wx.CheckBox(self.pnl,
-                                              id=-1,
-                                              label="也幫作者挖10分鐘(感恩)",
-                                              pos=[430, 240],
-                                              size=[300, 30])
-        self.helpAuthorCheckBox.Bind(wx.EVT_CHECKBOX, self.onCheckedHelpAuthor)
 
         # Start
         self.start = wx.Button(self.pnl,
@@ -222,7 +218,7 @@ class SmartMiner(wx.Frame):
         # New version recommendation
         if float(self.version) < float(self.latestVersion):
             self.onNewVersion()
-        elif float(self.Claymore) < float(self.latestClaymore) or True:
+        elif float(self.Claymore) < float(self.latestClaymore):
             self.onNewClaymoreVersion()
 
     def onNewClaymoreVersion(self):
@@ -283,7 +279,26 @@ class SmartMiner(wx.Frame):
 
     def onChecked(self, e):
         cb = e.GetEventObject()
-        print(cb.GetLabel(), 'is clicked', cb.GetValue())
+        checked_label = cb.GetName()
+        if checked_label == 'miner_bat':
+            self.command.Disable()
+            self.pool.Disable()
+            self.worker.Disable()
+            self.wallet.Disable()
+            self.email.Disable()
+        elif checked_label == 'miner_parm':
+            self.pool.Enable()
+            self.worker.Enable()
+            self.wallet.Enable()
+            self.email.Enable()
+            self.command.Disable()
+        elif checked_label == 'miner_command':
+            self.command.Enable()
+            self.pool.Disable()
+            self.worker.Disable()
+            self.wallet.Disable()
+            self.email.Disable()
+        print(cb.GetName(), 'is clicked', cb.GetValue())
 
     def startClicked(self, event):
         self.writeModifiedParameter()
@@ -344,10 +359,6 @@ class SmartMiner(wx.Frame):
         except Exception:
             pass
         self.running = not self.running
-
-    def onCheckedHelpAuthor(self, e):
-        self.helpAuthor = not self.helpAuthor
-        print("helpAuthor:", self.helpAuthor)
 
     def getVersion(self):
         url = 'https://www.lkm543.site/smartMiner.json'
@@ -419,7 +430,7 @@ if __name__ == '__main__':
 
     app = wx.App()
     frm = SmartMiner(None, title='時間挖礦v1.0')
-    frm.SetMaxSize(wx.Size(1280, 840))
-    frm.SetMinSize(wx.Size(1280, 840))
+    frm.SetMaxSize(wx.Size(670, 840))
+    frm.SetMinSize(wx.Size(670, 840))
     frm.Show()
     app.MainLoop()
