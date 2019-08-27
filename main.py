@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import re
 import signal
 import subprocess
 import webbrowser
@@ -248,6 +249,7 @@ class SmartMiner(wx.Frame):
             print(self.config)
 
     def checkPeak(self):
+        # return False
         now_timestamp = datetime.datetime.now().timestamp()
         weekday = datetime.datetime.today().weekday() + 1
         now = datetime.datetime.now()
@@ -318,7 +320,7 @@ class SmartMiner(wx.Frame):
                 # 離峰
                 if not peak:
                     self.minerStatus.AppendText(
-                        '------開始運行Claymore(請稍待5秒)------\n')
+                        '------開始運行Claymore------\n')
                     cwd = os.path.dirname(os.path.realpath(__file__))
                     cwd += "\\Claymore\\"
                     self.p = subprocess.Popen(commandLine,
@@ -406,31 +408,34 @@ class SmartMiner(wx.Frame):
         self.timeTxt.SetLabel(time)
         # Check if the miner is alive or not
         if self.p is not None and self.running:
+            print("It should running")
             poll = self.p.poll()
             if poll is not None:
+                print("But it is not running")
                 # p.subprocess is NOT alive
-                lines = self.p.stdout.readlines()
-                for line in lines:
-                    miner_status = line.decode('utf-8', 'ignore')
-                    print(miner_status)
-                    self.minerStatus.AppendText(miner_status)
+                self.read_miner()
                 self.stopMiner()
                 self.minerStatus.AppendText('------Claymore已終止------\n')
                 print('Miner stops......')
             # Read output of terminal
             else:
+                print("And it is actually running")
                 try:
-                    lines = self.p.stdout.readlines()
-                    for line in lines:
-                        miner_status = line.decode('utf-8', 'ignore')
-                        print(miner_status)
-                        self.minerStatus.AppendText(miner_status)
+                    self.read_miner()
                     # Check the time
                     if self.checkPeak():
                         self.stopMiner()
                 except Exception as e:
                     self.minerStatus.AppendText(f'{e}\n')
 
+    def read_miner(self):
+        lines = self.p.stdout.readlines()
+        for line in lines:
+            miner_status = line.decode('cp950').encode('utf-8', 'ignore')
+            miner_status = miner_status.rstrip()
+            miner_status += '\n'.encode('utf-8', 'ignore')
+            print(miner_status.decode('utf-8'))
+            self.minerStatus.AppendText(miner_status)
 
 if __name__ == '__main__':
 
