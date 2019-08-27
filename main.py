@@ -27,6 +27,7 @@ class SmartMiner(wx.Frame):
         self.latestClaymoreURL = self.releaseNote['claymore_url']
         self.readDefaultParameter()
         self.running = False
+        # 0: bat 1:command 2:parm
         self.miner_mode = 0
         self.p = None
         self.PID = None
@@ -249,7 +250,7 @@ class SmartMiner(wx.Frame):
             print(self.config)
 
     def checkPeak(self):
-        # return False
+        return False
         now_timestamp = datetime.datetime.now().timestamp()
         weekday = datetime.datetime.today().weekday() + 1
         now = datetime.datetime.now()
@@ -365,7 +366,7 @@ class SmartMiner(wx.Frame):
         try:
             os.kill(self.PID, signal.CTRL_C_EVENT)
         except Exception:
-            pass
+            print(Exception)
         self.running = not self.running
 
     def getVersion(self):
@@ -409,6 +410,9 @@ class SmartMiner(wx.Frame):
         # Check if the miner is alive or not
         if self.p is not None and self.running:
             print("It should running")
+            # The poll() method will return
+            # the exit code if the process is completed.
+            # None if the process is still running.
             poll = self.p.poll()
             if poll is not None:
                 print("But it is not running")
@@ -436,6 +440,9 @@ class SmartMiner(wx.Frame):
             miner_status += '\n'.encode('utf-8', 'ignore')
             print(miner_status.decode('utf-8'))
             self.minerStatus.AppendText(miner_status)
+
+    def parse_claymore(self, text):
+        pass
 
 if __name__ == '__main__':
 
