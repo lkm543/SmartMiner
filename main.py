@@ -4,6 +4,7 @@ import os
 import subprocess
 import webbrowser
 
+import chardet
 import requests
 import wx
 
@@ -60,6 +61,10 @@ class SmartMiner(wx.Frame):
             },
         }
 
+        fout = open("miner.out", 'w')
+        fout.close()
+        ferr = open("miner.err", 'w')
+        ferr.close()
         #  create a panel in the frame
         self.pnl = wx.Panel(self)
 
@@ -323,14 +328,16 @@ class SmartMiner(wx.Frame):
                     cwd += "\\Claymore\\"
                     # It must write to files
                     # Ref:http://noops.me/?p=92
-                    fdout = open("miner.out", 'w')
-                    fderr = open("miner.err", 'w')
+                    fout = open("miner.out", 'a+')
+                    ferr = open("miner.err", 'a+')
                     self.p = subprocess.Popen(commandLine,
                                               cwd=cwd,
-                                              stdout=fdout,
-                                              stderr=fderr,
+                                              stdout=fout,
+                                              stderr=ferr,
                                               shell=True,
-                                              bufsize=-1)
+                                              bufsize=1)
+                    fout.close()
+                    ferr.close()
                     self.PID = self.p.pid
                     # 如果開啟PID成功
                     if self.p is not None:
@@ -409,13 +416,11 @@ class SmartMiner(wx.Frame):
         self.timeTxt.SetLabel(time)
         # Check if the miner is alive or not
         if self.p is not None and self.running:
-            print("It should running")
             # The poll() method will return
             # the exit code if the process is completed.
             # None if the process is still running.
             poll = self.p.poll()
             if poll is not None:
-                print("But it is not running")
                 # p.subprocess is NOT alive
                 self.read_miner()
                 self.stopMiner()
@@ -423,7 +428,6 @@ class SmartMiner(wx.Frame):
                 print('Miner stops......')
             # Read output of terminal
             else:
-                print("And it is actually running")
                 try:
                     self.read_miner()
                     # Check the time
@@ -433,16 +437,11 @@ class SmartMiner(wx.Frame):
                     self.minerStatus.AppendText(f'{e}\n')
 
     def read_miner(self):
-        try:
-            i = open("miner.out", "r+", encoding="utf-8")
-            for line in i.readlines():
-                self.minerStatus.AppendText(line)
-                self.parse_claymore(line)
-                print(line)
-            # Clean it
-            i.truncate(0)
-        except UnicodeDecodeError:
-            i = open("miner.out", "r+")
+        with open("miner.out", "rb") as i:
+            result = chardet.detect(i.read())
+            charenc = result['encoding']
+
+        with open("miner.out", "r+", encoding=charenc) as i:
             for line in i.readlines():
                 self.minerStatus.AppendText(line)
                 self.parse_claymore(line)
