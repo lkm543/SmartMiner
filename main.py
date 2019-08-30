@@ -1,8 +1,6 @@
 import datetime
 import json
 import os
-import re
-import signal
 import subprocess
 import webbrowser
 
@@ -320,8 +318,7 @@ class SmartMiner(wx.Frame):
                 peak = self.checkPeak()
                 # 離峰
                 if not peak:
-                    self.minerStatus.AppendText(
-                        '------開始運行Claymore------\n')
+                    self.minerStatus.AppendText('------開始運行Claymore------\n')
                     cwd = os.path.dirname(os.path.realpath(__file__))
                     cwd += "\\Claymore\\"
                     self.p = subprocess.Popen(commandLine,
@@ -364,7 +361,7 @@ class SmartMiner(wx.Frame):
         self.st.SetLabel("暫停")
         self.start.SetLabel("Start")
         try:
-            os.kill(self.PID, signal.CTRL_C_EVENT)
+            self.p.kill()
         except Exception:
             print(Exception)
         self.running = not self.running
@@ -443,6 +440,7 @@ class SmartMiner(wx.Frame):
 
     def parse_claymore(self, text):
         pass
+
 
 if __name__ == '__main__':
 
