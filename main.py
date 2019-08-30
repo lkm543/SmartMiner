@@ -321,11 +321,14 @@ class SmartMiner(wx.Frame):
                     self.minerStatus.AppendText('------開始運行Claymore------\n')
                     cwd = os.path.dirname(os.path.realpath(__file__))
                     cwd += "\\Claymore\\"
+                    # It must write to files
+                    # Ref:http://noops.me/?p=92
+                    fdout = open("miner.out", 'w')
+                    fderr = open("miner.err", 'w')
                     self.p = subprocess.Popen(commandLine,
                                               cwd=cwd,
-                                              stdout=subprocess.PIPE,
-                                              stderr=subprocess.PIPE,
-                                              stdin=subprocess.PIPE,
+                                              stdout=fdout,
+                                              stderr=fderr,
                                               shell=True,
                                               bufsize=-1)
                     self.PID = self.p.pid
@@ -430,13 +433,22 @@ class SmartMiner(wx.Frame):
                     self.minerStatus.AppendText(f'{e}\n')
 
     def read_miner(self):
-        lines = self.p.stdout.readlines()
-        for line in lines:
-            miner_status = line.decode('cp950').encode('utf-8', 'ignore')
-            miner_status = miner_status.rstrip()
-            miner_status += '\n'.encode('utf-8', 'ignore')
-            print(miner_status.decode('utf-8'))
-            self.minerStatus.AppendText(miner_status)
+        try:
+            i = open("miner.out", "r+", encoding="utf-8")
+            for line in i.readlines():
+                self.minerStatus.AppendText(line)
+                self.parse_claymore(line)
+                print(line)
+            # Clean it
+            i.truncate(0)
+        except UnicodeDecodeError:
+            i = open("miner.out", "r+")
+            for line in i.readlines():
+                self.minerStatus.AppendText(line)
+                self.parse_claymore(line)
+                print(line)
+            # Clean it
+            i.truncate(0)
 
     def parse_claymore(self, text):
         pass
